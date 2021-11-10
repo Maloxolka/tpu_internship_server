@@ -4,9 +4,9 @@ from django.db import models
 
 
 class User(AbstractBaseUser, PermissionsMixin):
+    username = models.CharField('Логин', default='empty',max_length=100)
     email = models.EmailField('Почта', unique=True, max_length=100)
     password = models.CharField('Пароль', max_length=300)
-
     is_staff = models.BooleanField('Сотрудник?', default=False)
     is_superuser = models.BooleanField('Суперпользователь?', default=False)
     last_login = models.DateTimeField('Время последнего входа', null=True)
@@ -14,7 +14,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     updated_at = models.DateTimeField(auto_now=True)
 
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = []
+    REQUIRED_FIELDS = ['username']
 
     objects = UserManager()
 

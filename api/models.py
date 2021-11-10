@@ -19,7 +19,7 @@ class Skill(models.Model):
 class Student(models.Model):
     name = models.CharField('Имя', max_length=100)
     surname = models.CharField('Фамилия', max_length=100)
-    id_user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, related_name='user',
+    id_user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, related_name='student_user',
                                 verbose_name='Пользователь', db_column='id_user')
     skills = models.ManyToManyField(Skill)
     info = models.TextField('Информация', null=True)
@@ -39,7 +39,7 @@ class Project(models.Model):
     name = models.CharField('Название', max_length=250)
     url = models.CharField('Ссылка', max_length=250)
     info = models.TextField('Информация', null=True)
-    id_student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='student',
+    id_student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='project_student',
                                    verbose_name='Студент', db_column='id_student')
 
     class Meta:
@@ -54,7 +54,7 @@ class Project(models.Model):
 
 class Company(models.Model):
     name = models.CharField('Название', max_length=250)
-    id_user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, related_name='user',
+    id_user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, related_name='company_user',
                                 verbose_name='Пользователь', db_column='id_user')
     logo_url = models.CharField('Ссылка на логотип', max_length=1000)
     header_url = models.CharField('Ссылка на шапку', max_length=1000)
@@ -74,10 +74,10 @@ class Company(models.Model):
 class Vacancy(models.Model):
     name = models.CharField('Название', max_length=250)
     info = models.TextField('Информация', null=True)
-    id_company = models.ForeignKey(Company, on_delete=models.CASCADE, related_name='company',
+    id_company = models.ForeignKey(Company, on_delete=models.CASCADE, related_name='vacancy_company',
                                    verbose_name='Компания', db_column='id_company')
     skills = models.ManyToManyField(Skill)
-    responses = models.ManyToManyField(Student, through='Responses')
+    responses = models.ManyToManyField(Student, through='Response')
 
     class Meta:
         db_table = 'vacancies'
@@ -89,19 +89,26 @@ class Vacancy(models.Model):
         return self.name
 
 
-class Responses(models.Model):
+class Response(models.Model):
+
     class Status(models.TextChoices):
         NEW = 'N', _('New')
         CONSIDERED = 'C', _('Considered')
         ACCEPTED = 'A', _('Accepted')
         DENIED = 'D', _('Denied')
 
-    id_vacancy = models.ForeignKey(Vacancy, on_delete=models.CASCADE, related_name='vacancy',
+    id_vacancy = models.ForeignKey(Vacancy, on_delete=models.CASCADE, related_name='response_vacancy',
                                    verbose_name='Вакансия', db_column='id_vacancy')
-    id_student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='student',
+    id_student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='response_student',
                                    verbose_name='Студент', db_column='id_student')
     status = models.CharField(
         max_length=1,
         choices=Status.choices,
         default=Status.NEW,
     )
+
+    class Meta:
+        db_table = 'responses'
+        ordering = ['id_vacancy']
+        verbose_name = 'Ответ'
+        verbose_name_plural = 'Ответы'
